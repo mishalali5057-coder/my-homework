@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111329">
+<title>مذكّر واجباتي</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1022;--panel:#171d38;--line:#2b3458;--purple:#8b78ff;--text:#f4f5ff;--muted:#aab1cf;--green:#4bd5a0}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 85% 0,#29205b 0,transparent 35%),var(--bg);color:var(--text);padding:24px 14px}
+main{max-width:760px;margin:auto}.hero{text-align:center;padding:26px 12px 20px}.logo{font-size:42px}.hero h1{margin:8px 0;font-size:clamp(27px,6vw,38px)}.hero p{color:var(--muted);margin:0}
+.card{background:rgba(23,29,56,.94);border:1px solid var(--line);border-radius:22px;padding:20px;margin:16px 0;box-shadow:0 14px 40px #0003}
+h2{font-size:19px;margin:0 0 16px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0e142b;color:var(--text);font:inherit;min-width:0}input:focus{outline:2px solid var(--purple);border-color:transparent}.wide{grid-column:1/-1}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:700}.primary{width:100%;background:linear-gradient(120deg,#8b78ff,#6654dc);color:white;margin-top:14px}.primary:active,button:active{transform:scale(.98)}
+.stats{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px}.stats strong{color:white;font-size:19px}.homework{display:flex;align-items:center;gap:12px;background:#10162d;border:1px solid var(--line);border-radius:15px;padding:14px;margin-top:10px}.homework.done{opacity:.62}.homework.done .task-title{text-decoration:line-through}.check{width:24px;height:24px;accent-color:var(--green);flex:none}.task{flex:1;min-width:0}.task-title{font-weight:700;overflow-wrap:anywhere}.meta{font-size:12px;color:var(--muted);margin-top:5px}.delete{background:#482538;color:#ffb4c5;padding:9px 11px}.empty{text-align:center;color:var(--muted);padding:28px 8px}.footer{text-align:center;color:#7780a6;font-size:12px;padding:14px}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr}.wide{grid-column:auto}.card{padding:16px}.homework{gap:8px}.delete{padding:8px}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero"><div class="logo">📚</div><h1>مذكّر واجباتي</h1><p>رتّب واجباتك وتابع إنجازك بكل سهولة ✨</p></header>
+<section class="card">
+<h2>➕ إضافة واجب جديد</h2>
+<form id="homeworkForm">
+<div class="form-grid">
+<div class="wide"><label for="homeworkName">اسم الواجب</label><input id="homeworkName" maxlength="100" placeholder="مثال: حل صفحة 25" required></div>
+<div><label for="subjectName">المادة</label><input id="subjectName" maxlength="50" placeholder="مثال: رياضيات" required></div>
+<div><label for="dueDate">موعد التسليم (اختياري)</label><input id="dueDate" type="date"></div>
+</div>
+<button class="primary" type="submit">إضافة الواجب</button>
+</form>
+</section>
+<section class="card">
+<div class="stats"><h2 style="margin:0">📝 قائمة واجباتي</h2><span>المتبقي: <strong id="homeworkCount">0</strong></span></div>
+<div id="homeworkList"></div>
+<div class="empty" id="emptyMessage">ما عندك واجبات حاليًا 🎉<br>أضف أول واجب من الأعلى.</div>
+</section>
+<div class="footer">واجباتك مرتبة، وإنجازك أقرب 💜</div>
+</main>
+<script>
+const form=document.getElementById('homeworkForm');
+const list=document.getElementById('homeworkList');
+const empty=document.getElementById('emptyMessage');
+const count=document.getElementById('homeworkCount');
+let homework=[];
+try{homework=JSON.parse(localStorage.getItem('myHomework')||'[]');if(!Array.isArray(homework))homework=[]}catch(e){homework=[]}
+function save(){localStorage.setItem('myHomework',JSON.stringify(homework));render()}
+function render(){
+ list.innerHTML='';
+ count.textContent=homework.filter(x=>!x.done).length;
+ empty.style.display=homework.length?'none':'block';
+ homework.forEach(item=>{
+  const row=document.createElement('div');row.className='homework'+(item.done?' done':'');
+  const check=document.createElement('input');check.type='checkbox';check.className='check';check.checked=!!item.done;check.setAttribute('aria-label','تم إنجاز الواجب');check.addEventListener('change',()=>{item.done=check.checked;save()});
+  const task=document.createElement('div');task.className='task';
+  const title=document.createElement('div');title.className='task-title';title.textContent=item.name;
+  const meta=document.createElement('div');meta.className='meta';meta.textContent=item.subject+(item.date?' • التسليم: '+item.date:'');
+  task.append(title,meta);
+  const del=document.createElement('button');del.className='delete';del.type='button';del.textContent='حذف';del.addEventListener('click',()=>{homework=homework.filter(x=>x.id!==item.id);save()});
+  row.append(check,task,del);list.append(row);
+ });
+}
+form.addEventListener('submit',e=>{
+ e.preventDefault();
+ const name=document.getElementById('homeworkName').value.trim();
+ const subject=document.getElementById('subjectName').value.trim();
+ const date=document.getElementById('dueDate').value;
+ if(!name||!subject)return;
+ homework.unshift({id:Date.now(),name,subject,date,done:false});
+ form.reset();save();
+});
+render();
+</script>
+</body>
+</html>
