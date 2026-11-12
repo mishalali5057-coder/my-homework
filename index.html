@@ -1,203 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#172554">
-  <title>منظّم دراستي</title>
-  <style>
-    :root { --bg:#f4f7fb; --card:#fff; --text:#172033; --muted:#667085; --primary:#3157d5; --border:#e5eaf2; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:Tahoma,Arial,sans-serif; background:var(--bg); color:var(--text); }
-    header { background:linear-gradient(135deg,#172554,#3157d5); color:white; padding:28px 18px 38px; }
-    .wrap { width:min(920px, calc(100% - 28px)); margin:auto; }
-    h1 { margin:0 0 8px; font-size:28px; }
-    header p { margin:0; opacity:.9; }
-    main { margin-top:-18px; padding-bottom:35px; }
-    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
-    .stat,.panel { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 5px 18px #1725540a; }
-    .stat strong { display:block; font-size:25px; color:var(--primary); margin-bottom:4px; }
-    .stat span { color:var(--muted); font-size:13px; }
-    .panel { margin-bottom:16px; }
-    h2 { font-size:19px; margin:0 0 14px; }
-    form { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:10px; }
-    input,select,button { font:inherit; border-radius:10px; padding:12px; }
-    input,select { min-width:0; border:1px solid var(--border); background:white; color:var(--text); }
-    button { border:0; background:var(--primary); color:white; cursor:pointer; font-weight:bold; }
-    button:hover { filter:brightness(.95); }
-    .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .filters button { background:#edf1ff; color:#2948b5; padding:8px 13px; }
-    .filters button.active { background:var(--primary); color:white; }
-    .task { display:flex; align-items:center; gap:12px; border:1px solid var(--border); border-radius:12px; padding:13px; margin-top:9px; background:white; }
-    .task.done .task-name { text-decoration:line-through; color:var(--muted); }
-    .task-info { flex:1; min-width:0; }
-    .task-name { font-weight:bold; overflow-wrap:anywhere; }
-    .meta { color:var(--muted); font-size:12px; margin-top:5px; }
-    .task-actions { display:flex; gap:6px; }
-    .task-actions button { padding:8px 10px; font-size:12px; }
-    .task-actions .delete { background:#fff0f0; color:#b42318; }
-    .empty { color:var(--muted); text-align:center; padding:22px 8px; }
-    footer { color:var(--muted); text-align:center; font-size:12px; padding:10px 0 24px; }
-    @media(max-width:650px) {
-      form { grid-template-columns:1fr 1fr; }
-      form input:first-child { grid-column:1/-1; }
-      form button { grid-column:1/-1; }
-      .stats { gap:7px; }
-      .stat { padding:12px 8px; }
-      .stat strong { font-size:21px; }
-      .stat span { font-size:11px; }
-      .task { align-items:flex-start; flex-wrap:wrap; }
-      .task-actions { width:100%; justify-content:flex-end; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#172554">
+<title>منظّم دراستي</title>
+<style>
+:root{--navy:#172554;--blue:#2563eb;--sky:#eff6ff;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--white:#fff;--green:#15803d;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+header{background:linear-gradient(135deg,#172554,#1d4ed8);color:#fff;padding:25px 16px 22px}
+.wrap{max-width:980px;margin:auto;padding:0 14px}
+h1{font-size:25px;margin:0 0 5px}header p{margin:0;color:#dbeafe}
+.tabs{display:flex;gap:8px;overflow:auto;padding:14px 0;position:sticky;top:0;background:#f4f7fb;z-index:2}
+.tab{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;font-weight:700;white-space:nowrap;color:#334155}
+.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:16px;margin:0 0 14px;box-shadow:0 3px 12px #0f172a08}
+h2{font-size:19px;margin:0 0 13px;color:var(--navy)}h3{font-size:16px;margin:0 0 8px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;text-align:center}
+.stat strong{display:block;font-size:23px;color:var(--blue)}.stat span{font-size:12px;color:var(--muted)}
+.progress{height:11px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:9px}.bar{height:100%;width:0;background:#22c55e;transition:width .2s}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:11px;font:inherit;background:#fff;color:var(--ink);min-width:0}
+textarea{grid-column:1/-1;resize:vertical}
+button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;background:var(--blue);color:#fff}
+form button{grid-column:1/-1}.secondary{background:#eaf1ff;color:#1d4ed8}.danger{background:#fee2e2;color:#991b1b}.success{background:#dcfce7;color:#166534}
+.list{display:grid;gap:9px}.item{border:1px solid var(--line);border-radius:13px;padding:12px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between;background:#fff}
+.item.done{opacity:.7;background:#f8fafc}.item.done .item-title{text-decoration:line-through}
+.item-main{min-width:0;flex:1}.item-title{font-weight:750;overflow-wrap:anywhere}.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.actions button{padding:7px 9px;font-size:12px}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}.filters button{padding:8px 11px}
+.empty{color:var(--muted);text-align:center;padding:18px}
+.week{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.day{border:1px solid var(--line);border-radius:12px;padding:10px}.day h3{color:var(--blue)}
+.small{font-size:12px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:560px){.stats{gap:7px}.stat{padding:10px 5px}.stat strong{font-size:20px}form{grid-template-columns:1fr}.week{grid-template-columns:1fr}.item{flex-direction:column}.actions{width:100%}.actions button{flex:1}}
+</style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <h1>📚 منظّم دراستي</h1>
-      <p>رتّب واجباتك، تابع إنجازك، وخطّط ليومك بسهولة.</p>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <section class="stats" aria-label="إحصائيات الواجبات">
-      <div class="stat"><strong id="totalCount">0</strong><span>كل الواجبات</span></div>
-      <div class="stat"><strong id="pendingCount">0</strong><span>قيد الإنجاز</span></div>
-      <div class="stat"><strong id="doneCount">0</strong><span>مكتملة</span></div>
-    </section>
-
-    <section class="panel">
-      <h2>➕ أضف واجبًا جديدًا</h2>
-      <form id="taskForm">
-        <input id="taskName" type="text" placeholder="اسم الواجب أو المهمة" maxlength="100" required>
-        <input id="subject" type="text" placeholder="المادة" maxlength="40" required>
-        <input id="dueDate" type="date" aria-label="موعد التسليم">
-        <button type="submit">إضافة الواجب</button>
-      </form>
-    </section>
-
-    <section class="panel">
-      <h2>📝 قائمة واجباتي</h2>
-      <div class="filters" aria-label="تصفية الواجبات">
-        <button type="button" class="active" data-filter="all">الكل</button>
-        <button type="button" data-filter="pending">غير مكتملة</button>
-        <button type="button" data-filter="done">مكتملة</button>
-      </div>
-      <div id="taskList"><div class="empty">ما عندك واجبات حاليًا. أضف أول واجب لك!</div></div>
-    </section>
-    <footer>منظّم دراستي — بياناتك تُحفظ في هذا المتصفح على هذا الجهاز.</footer>
-  </main>
-
-  <script>
-    const STORAGE_KEY = "my-study-organizer-tasks-v1";
-    let tasks = [];
-    let currentFilter = "all";
-
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      tasks = Array.isArray(saved) ? saved : [];
-    } catch (error) {
-      tasks = [];
-    }
-
-    const form = document.getElementById("taskForm");
-    const taskList = document.getElementById("taskList");
-
-    function saveTasks() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    }
-
-    function updateStats() {
-      document.getElementById("totalCount").textContent = tasks.length;
-      document.getElementById("doneCount").textContent = tasks.filter(t => t.done).length;
-      document.getElementById("pendingCount").textContent = tasks.filter(t => !t.done).length;
-    }
-
-    function renderTasks() {
-      updateStats();
-      const visible = tasks.filter(task =>
-        currentFilter === "all" ||
-        (currentFilter === "done" && task.done) ||
-        (currentFilter === "pending" && !task.done)
-      );
-
-      taskList.replaceChildren();
-      if (!visible.length) {
-        const empty = document.createElement("div");
-        empty.className = "empty";
-        empty.textContent = tasks.length ? "لا توجد واجبات في هذا التصنيف." : "ما عندك واجبات حاليًا. أضف أول واجب لك!";
-        taskList.appendChild(empty);
-        return;
-      }
-
-      visible.sort((a,b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
-      visible.forEach(task => {
-        const row = document.createElement("div");
-        row.className = "task" + (task.done ? " done" : "");
-
-        const info = document.createElement("div");
-        info.className = "task-info";
-        const name = document.createElement("div");
-        name.className = "task-name";
-        name.textContent = task.name;
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = task.subject + (task.dueDate ? " • موعد التسليم: " + task.dueDate : "");
-        info.append(name, meta);
-
-        const actions = document.createElement("div");
-        actions.className = "task-actions";
-        const toggle = document.createElement("button");
-        toggle.type = "button";
-        toggle.textContent = task.done ? "إلغاء الإنجاز" : "تم الإنجاز";
-        toggle.addEventListener("click", () => {
-          task.done = !task.done;
-          saveTasks();
-          renderTasks();
-        });
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "delete";
-        remove.textContent = "حذف";
-        remove.addEventListener("click", () => {
-          if (confirm("هل تريد حذف هذا الواجب؟")) {
-            tasks = tasks.filter(t => t.id !== task.id);
-            saveTasks();
-            renderTasks();
-          }
-        });
-        actions.append(toggle, remove);
-        row.append(info, actions);
-        taskList.appendChild(row);
-      });
-    }
-
-    form.addEventListener("submit", event => {
-      event.preventDefault();
-      const name = document.getElementById("taskName").value.trim();
-      const subject = document.getElementById("subject").value.trim();
-      const dueDate = document.getElementById("dueDate").value;
-      if (!name || !subject) return;
-
-      tasks.push({
-        id: (Date.now().toString(36) + Math.random().toString(36).slice(2)),
-        name, subject, dueDate, done: false
-      });
-      saveTasks();
-      form.reset();
-      renderTasks();
-      document.getElementById("taskName").focus();
-    });
-
-    document.querySelectorAll("[data-filter]").forEach(button => {
-      button.addEventListener("click", () => {
-        currentFilter = button.dataset.filter;
-        document.querySelectorAll("[data-filter]").forEach(b => b.classList.toggle("active", b === button));
-        renderTasks();
-      });
-    });
-
-    renderTasks();
-  </script>
-</body>
-</html>
+<header><div class="wrap"><h1>📚 منظّم دراستي</h1><p>رتّب واجباتك، خطّط لمذاكرتك، وتابع إنجازك خطوة بخطوة.</p></div></header>
+<main class="wrap">
+<nav class="tabs" aria-label="أقسام الموقع">
+<button class="tab active" data-tab="tasks">الواجبات</button>
+<button class="tab" data-tab="schedule">جدول المذاكرة</button>
+<button class="tab" data-tab="exams">الاختبارات</button>
+<button class="tab" data-tab="grades">الدرجات</button>
+</nav>
+<section id="tasks" class="panel active">
+<div class="stats">
+<div class="stat"><strong id="totalCount">0</strong><span>كل الواجبات</span></div>
+<div class="stat"><strong id="doneCount">0</strong><span>المكتملة</span></div>
+<div class="stat"><strong id="percent">0%</strong><span>نسبة الإنجاز</span></div>
+</div>
+<div class="card"><h2>نسبة إنجازك</h2><div class="progress"><div class="bar" id="progressBar"></div></div><p class="small" id="progressText">ابدأ بإضافة أول واجب لك.</p></div>
+<div class="card"><h2>إضافة واجب جديد</h2>
+<form id="taskForm">
+<input id="taskName" placeholder="اسم الواجب" required maxlength="100">
+<input id="taskSubject" placeholder="المادة" required maxlength="60">
+<label class="small">موعد التسليم<input id="taskDate" type="date"></label>
+<label class="small">وقت التذكير<input id="taskTime" type="time" value="18:00"></label>
+<button type="submit">＋ إضافة الواجب</button>
+</form><p class="small">التذكير يظهر داخل الموقع عندما يكون مفتوحًا، وقد تحتاج للسماح بإشعارات المتصفح.</p>
+<button class="secondary" id="notifyBtn" type="button">تفعيل إشعارات المتصفح</button>
+</div>
+<div class="card"><h2>واجباتي</h2><div class="filters">
+<button class="secondary" data-filter="all">الكل</button><button class="secondary" data-filter="open">غير مكتملة</button><button class="secondary" data-filter="done">مكتملة</button>
+</div><div id="taskList" class="list"></div></div>
+</section>
+<section id="schedule" class="panel">
+<div class="card"><h2>إضافة حصة مذاكرة</h2><form id="scheduleForm">
+<input id="studyTitle" placeholder="المادة أو موضوع المذاكرة" required maxlength="100">
+<select id="studyDay"><option value="الأحد">الأحد</option><option value="الإثنين">الإثنين</option><option value="الثلاثاء">الثلاثاء</option><option value="الأربعاء">الأربعاء</option><option value="الخميس">الخميس</option><option value="الجمعة">الجمعة</option><option value="السبت">السبت</option></select>
+<label class="small">وقت البداية<input id="studyTime" type="time" value="16:00" required></label>
+<label class="small">المدة بالدقائق<input id="studyDuration" type="number" min="5" max="600" value="45" required></label>
+<button type="submit">＋ إضافة للجدول</button></form></div>
+<div class="card"><h2>جدولي الأسبوعي</h2><div id="weekGrid" class="week"></div></div>
+</section>
+<section id="exams" class="panel">
+<div class="card"><h2>إضافة اختبار</h2><form id="examForm">
+<input id="examName" placeholder="اسم الاختبار" required maxlength="100">
+<input id="examSubject" placeholder="المادة" required maxlength="60">
+<label class="small">تاريخ الاختبار<input id="examDate" type="date" required></label>
+<textarea id="examNotes" rows="2" placeholder="ملاحظات أو أجزاء الاختبار (اختياري)"></textarea>
+<button type="submit">＋ إضافة الاختبار</button></form></div>
+<div class="card"><h2>اختباراتي القادمة</h2><div id="examList" class="list"></div></div>
+</section>
+<section id="grades" class="panel">
+<div class="card"><h2>تسجيل درجة</h2><form id="gradeForm">
+<input id="gradeName" placeholder="اسم الاختبار أو التقييم" required maxlength="100">
+<input id="gradeSubject" placeholder="المادة" required maxlength="60">
+<input id="gradeEarned" type="number" min="0" step="0.5" placeholder="درجتك" required>
+<input id="gradeTotal" type="number" min="0.5" step="0.5" placeholder="الدرجة الكاملة" required>
+<button type="submit">＋ حفظ الدرجة</button></form></div>
+<div class="card"><h2>سجل الدرجات</h2><h3 id="gradeAverage">النسبة الإجمالية: لا توجد درجات</h3><div id="gradeList" class="list"></div></div>
+</section>
+</main>
+<footer>بياناتك محفوظة في هذا المتصفح على هذا الجهاز. لا تمسح بيانات المتصفح إذا أردت الاحتفاظ بها.</footer>
+<script>
+const KEYS={tasks:'my-study-organizer-tasks-v1',schedule:'my-study-organizer-schedule-v1',exams:'my-study-organizer-exams-v1',grades:'my-study-organizer-grades-v1'};
+const read=(key)=>{try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}};
+const save=(key,data)=>localStorage.setItem(key,JSON.stringify(data));
+let tasks=read(KEYS.tasks),schedule=read(KEYS.schedule),exams=read(KEYS.exams),grades=read(KEYS.grades),filter='all';
+const $=id=>document.getElementById(id);
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))}));
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;renderTasks()}));
+$('taskForm').addEventListener('submit',e=>{e.preventDefault();tasks.push({id:Date.now(),name:$('taskName').value.trim(),subject:$('taskSubject').value.trim(),date:$('taskDate').value,time:$('taskTime').value||'18:00',done:false,notified:false});save(KEYS.tasks,tasks);e.target.reset();$('taskTime').value='18:00';renderTasks()});
+function renderTasks(){let done=tasks.filter(t=>t.done).length,p=tasks.length?Math.round(done/tasks.length*100):0;$('totalCount').textContent=tasks.length;$('doneCount').textContent=done;$('percent').textContent=p+'%';$('progressBar').style.width=p+'%';$('progressText').textContent=tasks.length?`أنجزت ${done} من ${tasks.length} واجب.`:'ابدأ بإضافة أول واجب لك.';let shown=tasks.filter(t=>filter==='all'||(filter==='done'?t.done:!t.done)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));$('taskList').innerHTML=shown.length?shown.map(t=>`<div class="item ${t.done?'done':''}"><div class="item-main"><div class="item-title">${safe(t.name)}</div><div class="meta">${safe(t.subject)} · ${t.date?'التسليم: '+safe(t.date):'لا يوجد موعد'} · التذكير ${safe(t.time||'18:00')}</div></div><div class="actions"><button class="success" onclick="toggleTask(${t.id})">${t.done?'إلغاء الإنجاز':'تم الإنجاز'}</button><button class="danger" onclick="deleteTask(${t.id})">حذف</button></div></div>`).join(''):'<div class="empty">لا توجد واجبات في هذا القسم.</div>'}
+window.toggleTask=id=>{tasks=tasks.map(t=>t.id===id?{...t,done:!t.done}:t);save(KEYS.tasks,tasks);renderTasks()};
+window.deleteTask=id=>{if(confirm('هل تريد حذف هذا الواجب؟')){tasks=tasks.filter(t=>t.id!==id);save(KEYS.tasks,tasks);renderTasks()}};
+$('notifyBtn').addEventListener('click',async()=>{if(!('Notification'in window)){alert('المتصفح لا يدعم الإشعارات.');return}let p=await Notification.requestPermission();alert(p==='granted'?'تم السماح بالإشعارات. اترك الموقع مفتوحًا لتعمل التذكيرات.':'لم يتم السماح بالإشعارات.')});
+function checkReminders(){if(!('Notification'in window)||Notification.permission!=='granted')return;let now=new Date(),today=now.toISOString().slice(0,10),time=now.toTimeString().slice(0,5),changed=false;tasks.forEach(t=>{if(!t.done&&t.date===today&&(t.time||'18:00')<=time&&!t.notified){new Notification('تذكير بواجبك 📚',{body:t.name+' — '+t.subject});t.notified=true;changed=true}});if(changed)save(KEYS.tasks,tasks)}
+setInterval(checkReminders,30000);checkReminders();
+$('scheduleForm').addEventListener('submit',e=>{e.preventDefault();schedule.push({id:Date.now(),title:$('studyTitle').value.trim(),day:$('studyDay').value,time:$('studyTime').value,duration:$('studyDuration').value});save(KEYS.schedule,schedule);e.target.reset();$('studyTime').value='16:00';$('studyDuration').value=45;renderSchedule()});
+window.deleteStudy=id=>{schedule=schedule.filter(x=>x.id!==id);save(KEYS.schedule,schedule);renderSchedule()};
+const days=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function renderSchedule(){$('weekGrid').innerHTML=days.map(d=>{let items=schedule.filter(x=>x.day===d).sort((a,b)=>a.time.localeCompare(b.time));return `<div class="day"><h3>${d}</h3>${items.length?items.map(x=>`<div class="item"><div class="item-main"><b>${safe(x.title)}</b><div class="meta">${safe(x.time)} · ${safe(x.duration)} دقيقة</div></div><button class="danger" onclick="deleteStudy(${x.id})">حذف</button></div>`).join(''):'<div class="small">لا توجد مذاكرة</div>'}</div>`}).join('')}
+$('examForm').addEventListener('submit',e=>{e.preventDefault();exams.push({id:Date.now(),name:$('examName').value.trim(),subject:$('examSubject').value.trim(),date:$('examDate').value,notes:$('examNotes').value.trim()});save(KEYS.exams,exams);e.target.reset();renderExams()});
+window.deleteExam=id=>{exams=exams.filter(x=>x.id!==id);save(KEYS.exams,exams);renderExams()};
+function renderExams(){exams.sort((a,b)=>a.date.localeCompare(b.date));$('examList').innerHTML=exams.length?exams.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${safe(x.name)}</div><div class="meta">${safe(x.subject)} · ${safe(x.date)}</div>${x.notes?`<div class="meta">${safe(x.notes)}</div>`:''}</div><button class="danger" onclick="deleteExam(${x.id})">حذف</button></div>`).join(''):'<div class="empty">لا توجد اختبارات مسجلة.</div>'}
+$('gradeForm').addEventListener('submit',e=>{e.preventDefault();let earned=Number($('gradeEarned').value),total=Number($('gradeTotal').value);if(total<=0||earned>total){alert('تأكد أن الدرجة الكاملة أكبر من صفر وأن درجتك لا تتجاوزها.');return}grades.push({id:Date.now(),name:$('gradeName').value.trim(),subject:$('gradeSubject').value.trim(),earned,total});save(KEYS.grades,grades);e.target.reset();renderGrades()});
+window.deleteGrade=id=>{grades=grades.filter(x=>x.id!==id);save(KEYS.grades,grades);renderGrades()};
+function renderGrades(){let earned=grades.reduce((s,x)=>s+x.earned,0),total=grades.reduce((s,x)=>s+x.total,0);$('gradeAverage').textContent=total?`النسبة الإجمالية: ${Math.round(earned/total*100)}% (${earned} من ${total})`:'النسبة الإجمالية: لا توجد درجات';$('gradeList').innerHTML=grades.length?grades.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${safe(x.name)}</div><div class="meta">${safe(x.subject)} · ${x.earned} من ${x.total} (${Math.round(x.earned/x.total*100)}%)</div></div><button class="danger" onclick="deleteGrade(${x.id})">حذف</button></div>`).join(''):'<div class="empty">لم تسجل أي درجات بعد.</div>'}
+renderTasks();renderSchedule();renderExams();renderGrades();
+</script>
+</body></html>
