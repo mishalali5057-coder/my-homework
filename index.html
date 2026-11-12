@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#172554">
+  <title>منظّم دراستي</title>
+  <style>
+    :root { --bg:#f4f7fb; --card:#fff; --text:#172033; --muted:#667085; --primary:#3157d5; --border:#e5eaf2; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Tahoma,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    header { background:linear-gradient(135deg,#172554,#3157d5); color:white; padding:28px 18px 38px; }
+    .wrap { width:min(920px, calc(100% - 28px)); margin:auto; }
+    h1 { margin:0 0 8px; font-size:28px; }
+    header p { margin:0; opacity:.9; }
+    main { margin-top:-18px; padding-bottom:35px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+    .stat,.panel { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 5px 18px #1725540a; }
+    .stat strong { display:block; font-size:25px; color:var(--primary); margin-bottom:4px; }
+    .stat span { color:var(--muted); font-size:13px; }
+    .panel { margin-bottom:16px; }
+    h2 { font-size:19px; margin:0 0 14px; }
+    form { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:10px; }
+    input,select,button { font:inherit; border-radius:10px; padding:12px; }
+    input,select { min-width:0; border:1px solid var(--border); background:white; color:var(--text); }
+    button { border:0; background:var(--primary); color:white; cursor:pointer; font-weight:bold; }
+    button:hover { filter:brightness(.95); }
+    .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .filters button { background:#edf1ff; color:#2948b5; padding:8px 13px; }
+    .filters button.active { background:var(--primary); color:white; }
+    .task { display:flex; align-items:center; gap:12px; border:1px solid var(--border); border-radius:12px; padding:13px; margin-top:9px; background:white; }
+    .task.done .task-name { text-decoration:line-through; color:var(--muted); }
+    .task-info { flex:1; min-width:0; }
+    .task-name { font-weight:bold; overflow-wrap:anywhere; }
+    .meta { color:var(--muted); font-size:12px; margin-top:5px; }
+    .task-actions { display:flex; gap:6px; }
+    .task-actions button { padding:8px 10px; font-size:12px; }
+    .task-actions .delete { background:#fff0f0; color:#b42318; }
+    .empty { color:var(--muted); text-align:center; padding:22px 8px; }
+    footer { color:var(--muted); text-align:center; font-size:12px; padding:10px 0 24px; }
+    @media(max-width:650px) {
+      form { grid-template-columns:1fr 1fr; }
+      form input:first-child { grid-column:1/-1; }
+      form button { grid-column:1/-1; }
+      .stats { gap:7px; }
+      .stat { padding:12px 8px; }
+      .stat strong { font-size:21px; }
+      .stat span { font-size:11px; }
+      .task { align-items:flex-start; flex-wrap:wrap; }
+      .task-actions { width:100%; justify-content:flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>📚 منظّم دراستي</h1>
+      <p>رتّب واجباتك، تابع إنجازك، وخطّط ليومك بسهولة.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="stats" aria-label="إحصائيات الواجبات">
+      <div class="stat"><strong id="totalCount">0</strong><span>كل الواجبات</span></div>
+      <div class="stat"><strong id="pendingCount">0</strong><span>قيد الإنجاز</span></div>
+      <div class="stat"><strong id="doneCount">0</strong><span>مكتملة</span></div>
+    </section>
+
+    <section class="panel">
+      <h2>➕ أضف واجبًا جديدًا</h2>
+      <form id="taskForm">
+        <input id="taskName" type="text" placeholder="اسم الواجب أو المهمة" maxlength="100" required>
+        <input id="subject" type="text" placeholder="المادة" maxlength="40" required>
+        <input id="dueDate" type="date" aria-label="موعد التسليم">
+        <button type="submit">إضافة الواجب</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>📝 قائمة واجباتي</h2>
+      <div class="filters" aria-label="تصفية الواجبات">
+        <button type="button" class="active" data-filter="all">الكل</button>
+        <button type="button" data-filter="pending">غير مكتملة</button>
+        <button type="button" data-filter="done">مكتملة</button>
+      </div>
+      <div id="taskList"><div class="empty">ما عندك واجبات حاليًا. أضف أول واجب لك!</div></div>
+    </section>
+    <footer>منظّم دراستي — بياناتك تُحفظ في هذا المتصفح على هذا الجهاز.</footer>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "my-study-organizer-tasks-v1";
+    let tasks = [];
+    let currentFilter = "all";
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      tasks = Array.isArray(saved) ? saved : [];
+    } catch (error) {
+      tasks = [];
+    }
+
+    const form = document.getElementById("taskForm");
+    const taskList = document.getElementById("taskList");
+
+    function saveTasks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function updateStats() {
+      document.getElementById("totalCount").textContent = tasks.length;
+      document.getElementById("doneCount").textContent = tasks.filter(t => t.done).length;
+      document.getElementById("pendingCount").textContent = tasks.filter(t => !t.done).length;
+    }
+
+    function renderTasks() {
+      updateStats();
+      const visible = tasks.filter(task =>
+        currentFilter === "all" ||
+        (currentFilter === "done" && task.done) ||
+        (currentFilter === "pending" && !task.done)
+      );
+
+      taskList.replaceChildren();
+      if (!visible.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = tasks.length ? "لا توجد واجبات في هذا التصنيف." : "ما عندك واجبات حاليًا. أضف أول واجب لك!";
+        taskList.appendChild(empty);
+        return;
+      }
+
+      visible.sort((a,b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
+      visible.forEach(task => {
+        const row = document.createElement("div");
+        row.className = "task" + (task.done ? " done" : "");
+
+        const info = document.createElement("div");
+        info.className = "task-info";
+        const name = document.createElement("div");
+        name.className = "task-name";
+        name.textContent = task.name;
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = task.subject + (task.dueDate ? " • موعد التسليم: " + task.dueDate : "");
+        info.append(name, meta);
+
+        const actions = document.createElement("div");
+        actions.className = "task-actions";
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.textContent = task.done ? "إلغاء الإنجاز" : "تم الإنجاز";
+        toggle.addEventListener("click", () => {
+          task.done = !task.done;
+          saveTasks();
+          renderTasks();
+        });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "delete";
+        remove.textContent = "حذف";
+        remove.addEventListener("click", () => {
+          if (confirm("هل تريد حذف هذا الواجب؟")) {
+            tasks = tasks.filter(t => t.id !== task.id);
+            saveTasks();
+            renderTasks();
+          }
+        });
+        actions.append(toggle, remove);
+        row.append(info, actions);
+        taskList.appendChild(row);
+      });
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const name = document.getElementById("taskName").value.trim();
+      const subject = document.getElementById("subject").value.trim();
+      const dueDate = document.getElementById("dueDate").value;
+      if (!name || !subject) return;
+
+      tasks.push({
+        id: (Date.now().toString(36) + Math.random().toString(36).slice(2)),
+        name, subject, dueDate, done: false
+      });
+      saveTasks();
+      form.reset();
+      renderTasks();
+      document.getElementById("taskName").focus();
+    });
+
+    document.querySelectorAll("[data-filter]").forEach(button => {
+      button.addEventListener("click", () => {
+        currentFilter = button.dataset.filter;
+        document.querySelectorAll("[data-filter]").forEach(b => b.classList.toggle("active", b === button));
+        renderTasks();
+      });
+    });
+
+    renderTasks();
+  </script>
+</body>
+</html>
